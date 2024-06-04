@@ -1,3 +1,3 @@
-# dgame
+# DGAME
 
-A new Flutter project.
+A new android drinking game made in flutter.
