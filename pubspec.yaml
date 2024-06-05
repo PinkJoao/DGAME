@@ -20,6 +20,7 @@ dependencies:
   align_positioned: ^4.0.1
   shared_preferences: ^2.2.2
   permission_handler: ^11.3.0
+  random_name_generator: ^1.3.0
   flutter_launcher_icons: ^0.13.1
   lecle_downloads_path_provider: ^0.0.2+8
 
