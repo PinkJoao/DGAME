@@ -481,10 +481,13 @@ class CameraPageState extends State<CameraPage> {
   late Future<void> initializeControllerFuture;
   bool isCameraInitialized = false;
   Uint8List? fileBytes;
+  File? file;
   bool isFlashOn = false;
   int selectedCameraIndex = 0;
   double currentZoomLevel = 1.0;
   double maxZoomLevel = 1.0;
+  Offset? _focusPoint;
+  final GlobalKey _cameraKey = GlobalKey();
 
   @override
   void initState() {
@@ -497,7 +500,7 @@ class CameraPageState extends State<CameraPage> {
       cameras = await availableCameras();
       cameraController = CameraController(
         cameras[selectedCameraIndex],
-        ResolutionPreset.high,
+        ResolutionPreset.max,
       );
 
       initializeControllerFuture = cameraController.initialize();
@@ -525,132 +528,155 @@ class CameraPageState extends State<CameraPage> {
     return Scaffold(
       body: Center(
         child: !isCameraInitialized
-          ? const CircularProgressIndicator()
-          : Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    if (fileBytes == null)
-                      Align(
-                        alignment: Alignment.center,
-                        child: GestureDetector(
-                          onScaleUpdate: (ScaleUpdateDetails details) {
-                            handleScaleUpdate(details);
-                          },
-                          child: CameraPreview(cameraController),
+            ? const CircularProgressIndicator()
+            : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  if (fileBytes == null)
+                    Align(
+                      alignment: Alignment.center,
+                      child: GestureDetector(
+                        onScaleUpdate: (ScaleUpdateDetails details) {
+                          handleScaleUpdate(details);
+                        },
+                        onTapDown: (TapDownDetails details) {
+                          onViewFinderTap(details);
+                        },
+                        child: CameraPreview(
+                          cameraController,
+                          key: _cameraKey,
+                          child: _focusPoint != null
+                            ? Positioned(
+                              left: _focusPoint!.dx - 40,
+                              top: _focusPoint!.dy - 40,
+                              child: Container(
+                                height: 80,
+                                width: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white)
+                                ),
+                              ),
+                            )
+                            : null,
                         ),
                       ),
+                    ),
 
-                    if (fileBytes == null)
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 50),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isFlashOn = !isFlashOn;
-                                  });
-                                },
-                                child: Icon(
-                                  isFlashOn ? Icons.flash_on : Icons.flash_off,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                  
 
-                    if (fileBytes == null)
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 30),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              GestureDetector(
-                                onTap: selectFromGallery,
-                                child: const Icon(
-                                  Icons.photo_library,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: takePicture,
-                                child: const Icon(
-                                  Icons.camera_outlined,
-                                  size: 70,
-                                  color: Colors.orange,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: switchCamera,
-                                child: const Icon(
-                                  Icons.switch_camera,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
 
-                    if (fileBytes != null)
-                      Center(
-                        child: Hero(
-                          tag: fileBytes.toString(),
-                          child: PhotoView(
-                            imageProvider: Image.memory(fileBytes!).image,
-                            enableRotation: true,
-                            tightMode: true,
-                            backgroundDecoration: const BoxDecoration(color: Colors.transparent),
-                          ),
+                  if (fileBytes == null)
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 50),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  isFlashOn = !isFlashOn;
+                                });
+                              },
+                              child: Icon(
+                                isFlashOn ? Icons.flash_on : Icons.flash_off,
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                    ),
 
-                    if (fileBytes != null)
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 30),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              GestureDetector(
-                                onTap: discardPhoto,
-                                child: const Icon(
-                                  CupertinoIcons.clear_circled,
-                                  size: 70,
-                                  color: Colors.redAccent,
-                                ),
+                  if (fileBytes == null)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: selectFromGallery,
+                              child: const Icon(
+                                Icons.photo_library,
+                                size: 40,
+                                color: Colors.white,
                               ),
-                              GestureDetector(
-                                onTap: confirmPhoto,
-                                child: const Icon(
-                                  CupertinoIcons.check_mark_circled,
-                                  size: 70,
-                                  color: Colors.lightGreenAccent,
-                                ),
+                            ),
+                            GestureDetector(
+                              onTap: takePicture,
+                              child: const Icon(
+                                Icons.camera_outlined,
+                                size: 70,
+                                color: Colors.orange,
                               ),
-                            ],
-                          ),
+                            ),
+                            GestureDetector(
+                              onTap: switchCamera,
+                              child: const Icon(
+                                Icons.switch_camera,
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                  ],
-                ),
+                    ),
+
+                  if (fileBytes != null)
+                    Center(
+                      child: Hero(
+                        tag: fileBytes.toString(),
+                        child: PhotoView(
+                          imageProvider: Image.memory(fileBytes!).image,
+                          enableRotation: true,
+                          tightMode: true,
+                          backgroundDecoration: const BoxDecoration(color: Colors.transparent),
+                        ),
+                      ),
+                    ),
+
+                  if (fileBytes != null)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            GestureDetector(
+                              onTap: discardPhoto,
+                              child: const Icon(
+                                CupertinoIcons.clear_circled,
+                                size: 70,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: confirmPhoto,
+                              child: const Icon(
+                                CupertinoIcons.check_mark_circled,
+                                size: 70,
+                                color: Colors.lightGreenAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -663,10 +689,11 @@ class CameraPageState extends State<CameraPage> {
     try {
       await initializeControllerFuture;
       final XFile image = await cameraController.takePicture();
-      File file = File(image.path);
-      Uint8List fileData = await file.readAsBytes();
+      File tempfile = File(image.path);
+      Uint8List fileData = await tempfile.readAsBytes();
 
       setState(() {
+        file = tempfile;
         fileBytes = fileData;
       });
     } catch (e) {
@@ -681,13 +708,18 @@ class CameraPageState extends State<CameraPage> {
   void discardPhoto() {
     if (mounted) {
       setState(() {
+        file = null;
         fileBytes = null;
       });
     }
   }
 
   void confirmPhoto() {
-    Navigator.pop(context, fileBytes);
+    Map result = {
+      'bytes':fileBytes,
+      'file':file,
+    };
+    Navigator.pop(context, result);
   }
 
   void switchCamera() async {
@@ -738,15 +770,42 @@ class CameraPageState extends State<CameraPage> {
       cameraController.setZoomLevel(currentZoomLevel);
     });
   }
+
+  void onViewFinderTap(TapDownDetails details) {
+    final Offset offset = details.localPosition;
+    final RenderBox renderBox = _cameraKey.currentContext?.findRenderObject() as RenderBox;
+    final Size size = renderBox.size;
+    final Offset focusPoint = Offset(offset.dx / size.width, offset.dy / size.height);
+
+    setState(() {
+      _focusPoint = offset;
+    });
+
+    cameraController.setFocusPoint(focusPoint);
+    cameraController.setExposurePoint(focusPoint);
+  }
 }
 
-Future<Uint8List?> takePhoto(BuildContext context) async {
-  final Uint8List? fileBytes = await Navigator.push(
+Future<Uint8List?> takePhotoBytes(BuildContext context) async {
+  final Map result = await Navigator.push(
     context,
     MaterialPageRoute(builder: (context) => CameraPage()),
   );
 
+  Uint8List? fileBytes = result['bytes'];
+
   return fileBytes;
+}
+
+Future<File?> takePhoto(BuildContext context) async {
+  final Map result = await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => CameraPage()),
+  );
+
+  File? file = result['file'];
+
+  return file;
 }
 
 Future<bool> takePhotoAndStore(BuildContext context, String prefix, String folder, Directory directory) async {
