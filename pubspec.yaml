@@ -33,9 +33,14 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo.png
+    - assets/images/logoDark.png
+    - assets/images/logoWhite.png
+    - assets/images/logoTransparent.png
+    - assets/images/logoDarkCup100.png
+    - assets/images/logoDarkCup75.png
+    - assets/images/logoDarkCup50.png
 
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/logoDarkCup75.png"
