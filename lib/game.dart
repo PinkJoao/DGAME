@@ -18,7 +18,8 @@ class GamePage extends StatefulWidget {
 }
 
 class GamePageState extends State<GamePage> {
-  CarouselController carouselController = CarouselController();
+  
+  ScrollController carouselController = ScrollController();
 
   @override
   void initState() {
@@ -29,65 +30,90 @@ class GamePageState extends State<GamePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-
-              CarouselSlider(
-                items: <Widget>[
-                  
-                  for(Color color in Colors.primaries)
-                    Container(
-                      decoration: BoxDecoration(
+      body: Container(
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+        height: getTotalHeight(context),
+        width: getTotalWidth(context),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            //for(Color color in Colors.primaries)
+            Container(                                                            // LAYER 00
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              height: getTotalHeight(context),
+              width: getTotalHeight(context),
+              child: SingleChildScrollView(
+                controller: carouselController,
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for(Color color in Colors.primaries + Colors.primaries)
+                      Container(
+                        width: getTotalWidth(context),
                         color: color,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                
+                              },
+                              child: Text('prev'),
+                            ),
 
-                ],
-                carouselController: carouselController,
-                options: CarouselOptions(
-                  aspectRatio: 9/16,
-                  viewportFraction: 1,
-                  enableInfiniteScroll: false,
-                  enlargeCenterPage: true,
-                  onPageChanged: (index, reason) {
-                    if(index == 17){
-                      
-                    }
-                  },
+                            ElevatedButton(
+                              onPressed: () {
+                                carouselController.animateTo(150, duration: Duration(milliseconds: 500), curve: Curves.linear); // adaptar
+                              },
+                              child: Text('next'),
+                            ),
+                          ]
+                        ),
+                      )
+                  ],
                 ),
               ),
+            ),
 
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IconButton(
-                    onPressed: (){
+            Container(                                                            // LAYER 01
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              height: getTotalHeight(context),
+              width: getTotalHeight(context),
+              child: Center(),
+            ),
 
-                    }, 
-                    icon: Icon(CupertinoIcons.back)
-                  ),
+            Container(                                                            // LAYER 02
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              height: getTotalHeight(context),
+              width: getTotalHeight(context),
+              child: Center(),
+            ),
 
-                  IconButton(
-                    onPressed: (){
+            Container(                                                            // LAYER 03
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              height: getTotalHeight(context),
+              width: getTotalHeight(context),
+              child: Center(),
+            ),
 
-                    }, 
-                    icon: Icon(CupertinoIcons.forward)
-                  ),
-                ],
-              )
+            Container(                                                            // LAYER 04
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              height: getTotalHeight(context),
+              width: getTotalHeight(context),
+              child: Center(),
+            ),
 
-            ],
-          ),
-        )
+            Container(                                                            // LAYER 05
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              height: getTotalHeight(context),
+              width: getTotalHeight(context),
+              child: Center(),
+            )
+          ],
+        ),
       ),
     );
   }

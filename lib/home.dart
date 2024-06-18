@@ -14,9 +14,9 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  List<String> players = [];
-  int playerCount = 0;
-  List<TextEditingController> controllers = [];
+  List<String> players = ['','',''];
+  int playerCount = 3;
+  List<TextEditingController> controllers = [TextEditingController(),TextEditingController(),TextEditingController()];
   TextEditingController playerInputController = TextEditingController();
   FocusNode focus = FocusNode();
   final randomNames = RandomNames(Zone.us);
@@ -38,7 +38,11 @@ class HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.max,
           children: [
 
-            SizedBox(height: getTotalHeight(context)/2,),
+            Container(
+              height: getTotalHeight(context)/2,
+              padding: const EdgeInsets.fromLTRB(0,50,0,10),
+              child: Image.asset('assets/images/logo00.png'),
+            ),
 
             
 
